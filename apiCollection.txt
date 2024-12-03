@@ -1,0 +1,151 @@
+http://localhost:4008/v1/measurements
+
+    "HEIGHT"
+  | "WEIGHT"
+  | "FOOT LENGTH"
+  | "CALORIES GOAL"
+  | "DISTANCE GOAL"
+  | "STEPS GOAL"
+  | "LITERS"
+  | "HOURS"
+
+Request:
+HEIGHT PayLoad:
+
+{
+    "title":"3.1 Feet",
+    "measurementValue":"3'1''",
+    "units":"FEET",
+    "measurementSection":"HEIGHT"
+}
+
+WEIGHT PayLoad:
+{
+    "title":"30 KG",
+    "measurementValue":"30",
+    "units":"KG",
+    "measurementSection":"WEIGHT"
+}
+
+Response:
+{
+    "status": "success",
+    "code": 200,
+    "message": "30 KG created successfully",
+    "data": null
+}
+----------------------------------------------------------------
+Fetch ALL :
+http://localhost:4008/v1/measurements
+----------------------------------------------------------------
+Fetch Section based List:
+http://localhost:4008/v1/measurements/HEIGHT
+----------------------------------------------------------------
+
+
+User Sign up:
+
+http://localhost:4008/user/v1/signup
+{
+    "mobile":"9182900940"
+}
+Response:
+{
+    "code": 200,
+    "message": "User Created Successfully."
+}
+
+----------------------------------------------------------------
+
+http://localhost:4008/user/v1/verifymobile
+Request:
+Method : POST
+Payload:
+{
+"mobile":"9182900940",
+"verificationCode":"Z8LQ"
+}
+Response:
+{
+    "code": 200,
+    "message": "Verification Completed Successfully.",
+    "data": null
+}
+
+----------------------------------------------------------------
+Login:
+
+http://localhost:4008/user/v1/login
+
+Method: POST
+
+PayLoad :
+    {
+        "username":"9182900940",
+        "password":"9182900940"
+    }
+
+Response:
+{
+    "code": 200,
+    "message": "Auth successful",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOiI2NzRiNzE5OGFiYTliZTdhODE0M2RhNWIiLCJlbWFpbCI6InZhY2hhcmkwMTBAZ21haWwuY29tIiwibW9iaWxlIjoiOTE4MjkwMDk0MCIsImlhdCI6MTczMzA1Nzc4NCwiZXhwIjozNDY2NDc1NTY4LCJpc3MiOiJWSU5UUk9OX1RPS0VOX1JBTkRPTSJ9.bC34Ix9LPNXi4T43dxHiKyrwl_o1KQDuCnWnwX622cQ",
+    "user": {
+        "email": "vachari010@gmail.com",
+        "mobile": "9182900940",
+        "status": 1,
+        "pkID": "674b7198aba9be7a8143da5b",
+        "userID": "64f29425-8d83-4942-abb7-d52e940cb8e3",
+        "emailVerified": true,
+        "mobileVerified": true,
+        "age": 33,
+        "weight": 72,
+        "height": "5'4''",
+        "gender": "Male",
+        "interestedCategories": [
+            {
+                "moduleName": "HYDRATION",
+                "moduleID": "HYDRATION"
+            }
+        ]
+    }
+}
+----------------------------------------------------------------
+
+http://localhost:4008/user/v1/waterInTakeSuggestion
+
+{
+    "height":"5'9''",
+    "weight":"72",
+    "age":"33",
+    "gender":"Male"
+}
+
+Response:
+
+{
+    "code": 200,
+    "message": "Water intake calculated successfully",
+    "data": {
+        "weight_kg": 72,
+        "height_cm": 175.26,
+        "gender": "Male",
+        "age": 33,
+        "activity_level": 1.5,
+        "recommended_water_intake_ml": 3564,
+        "recommended_water_intake_liter": 3.564
+    }
+}
+----------------------------------------------------------------
+
+http://localhost:4008/user/v1/updateprofile
+
+{
+    "userName":"Venkateswara Achari",
+    "email":"vachari010@gmail.com",
+    "age":33,
+    "weight":72,
+    "height":"5'4''",
+    "gender":"Male",
+    "userID":"64f29425-8d83-4942-abb7-d52e940cb8e3"
+}
