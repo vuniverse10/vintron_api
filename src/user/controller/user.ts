@@ -49,10 +49,10 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
     const insertResult = await user.save();
     return res
       .status(200)
-      .json({ code: 200, message: "User Created Successfully." });
+      .json({ code: 200, message: "User Created Successfully.",otp:mobileOTP });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ code: 200, message: "Insertion Failed." });
+    return res.status(500).json({ code: 200, message: "Insertion Failed.",otp:null });
   }
 };
 
