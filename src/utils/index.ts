@@ -1,6 +1,6 @@
-export const generateOTP = (length = 4) => {
+export const generateOTP = (length = 6) => {
   let otp = "";
-  const characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const characters = "0123456789";
 
   for (let i = 0; i < length; i++) {
     const index = Math.floor(Math.random() * characters.length);
