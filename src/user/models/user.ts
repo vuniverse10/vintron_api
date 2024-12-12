@@ -37,6 +37,7 @@ const UserSchema: Schema = new Schema(
     mobileVerified: { type: Boolean, default: false },
     createdOn: { type: Date, default: Date.now },
     modifiedOn: { type: Date, default: Date.now },
+      nutritionCalories: { type: String, required: false },
   },
   {
     timestamps: true,

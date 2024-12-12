@@ -195,6 +195,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
             ? user.interestedCategories
             : [],
           deviceID: user.deviceID,
+          nutritionCalories:user.nutritionCalories,
         };
         return res.status(statuscodes.SUCCESS).json({
           code: statuscodes.SUCCESS,
@@ -585,6 +586,41 @@ const updateSelectedCategories = async (
   }
 };
 
+const setUserNutrition = async (req: Request, res: Response) => {
+  let  { calorie, userID } = req.body;
+
+  try {
+    const authRes = res["locals"]["jwt"];
+    const updateResult = await User.findOneAndUpdate(
+        { userID: userID },
+        {
+          $set: {
+            nutritionCalories: calorie,
+          },
+        },
+        {
+          returnDocument: "after",
+        }
+    );
+
+    if (updateResult)
+      return res.status(200).json({ status:'success',code:200,message: "Calorie Updated Successfully" });
+    else
+      return res.status(500).json({
+        status:'Fail',
+        code:400,
+        message: "Unable to assign Modules",
+      });
+  } catch (error: any) {
+    return res.status(500).json({
+      status:'Error',
+      code:500,
+      message: error.message,
+      error,
+    });
+  }
+}
+
 export default {
   validateToken,
   register,
@@ -601,4 +637,5 @@ export default {
   checkEmailExists,
   checkMobileExists,
   updateSelectedCategories,
+  setUserNutrition
 };

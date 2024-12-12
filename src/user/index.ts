@@ -27,4 +27,5 @@ router.put("/changepassword", controller.changePassword);
 router.post("/checkemail", controller.checkEmailExists);
 router.post("/checkmobile", controller.checkMobileExists);
 router.post("/waterInTakeSuggestion", hydration.waterSuggestion);
+router.post("/set-user-nutrition-data", controller.setUserNutrition);
 export default router;

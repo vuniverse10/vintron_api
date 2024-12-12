@@ -17,6 +17,7 @@ type MeasurementSection =
   | "DISTANCE GOAL"
   | "STEPS GOAL"
   | "LITERS"
+    | "MEAL_TYPE"
   | "HOURS";
 
 const successResponse = (message: string, data: any = null) => ({

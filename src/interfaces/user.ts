@@ -20,4 +20,5 @@ export default interface IUser extends Document {
   height: string;
   gender: string;
   deviceID?: string;
+  nutritionCalories?:string;
 }
