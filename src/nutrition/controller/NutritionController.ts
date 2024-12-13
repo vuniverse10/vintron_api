@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 import axios from "axios";
 import dotenv from "dotenv";
 import FoodItemsModel from "../models/NutritionModel";
+import UserFoodItemsModel from "../models/NutritionOrders";
+import User from "../../user/models/user";
 const nutritionSearch = async (
     req: Request,
     res: Response,
@@ -82,37 +84,132 @@ const nutritionSearch = async (
 };
 
 const saveUserNutrition = async(req: Request, res: Response,  next: NextFunction) => {
-    return res.status(200).json({
-        error: 'Error calling the external API',
-        message: "API Is working",
-        code:200
-    });
+   const { userID,orderDate,orderTime,foodItem, itemWeight,mealType,itemQuantity } = req.body;
+    try{
+        //:TODO - check duplication exists or not.
+        const payLoadRequest = {
+            userID: userID,
+            itemWeight: itemWeight,
+            mealType: mealType,
+            itemQuantity: Number(itemQuantity),
+            foodItem: foodItem,
+            orderDate: orderDate,
+            orderTime: orderTime,
+            foodItemCalories:foodItem.calories_calculated_for,
+            consumedCalories: (itemQuantity * foodItem.calories_calculated_for),
+        };
+        const saveFoodItem = new UserFoodItemsModel(payLoadRequest);
+        const insertResult = await saveFoodItem.save();
+        if(insertResult){
+            return res
+                .status(201)
+                .json({ code: 200, message: "Food item added successfully.", data:insertResult });
+        }
+        return res
+            .status(204)
+            .json({ code: 204, message: "error occured", data:null });
+    }catch(error){
+        console.error(error);
+        return res
+            .status(500)
+            .json({ code: 500, message: "error occured", data:null });
+    }
+
+
 }
 
-const updateUserNutritionDateTime = async(req: Request, res: Response,  next: NextFunction) => {
-    return res.status(200).json({
-        error: 'Error calling the external API',
-        message: "API Is working",
-        code:200
-    });
+const updateUserNutritionData = async(req: Request, res: Response,  next: NextFunction) => {
+    let { userID,itemWeight, mealType, itemQuantity, orderDate, orderTime, id } = req.body;
+
+    try {
+        const authRes = res["locals"]["jwt"];
+        const updateResult = await UserFoodItemsModel.findOneAndUpdate(
+            { _id: id },
+            {
+                $set: {
+                    itemWeight: itemWeight,
+                    mealType: mealType,
+                    itemQuantity: Number(itemQuantity),
+                    orderDate: orderDate,
+                    orderTime: orderTime,
+                },
+            },
+            {
+                returnDocument: "after",
+            }
+        );
+
+        if (updateResult)
+            return res.status(200).json({ code:200, message: "Item details updated Successfully", data: updateResult });
+        else
+            return res.status(204).json({
+                code: 204,
+                message: "Unable to Update",
+                data:null,
+            });
+    } catch (error: any) {
+        return res.status(500).json({
+            code: 500,
+            message: "Server Error",
+            data:error,
+        });
+    }
 }
 
-const userDayBasedNutritionData = async(req: Request, res: Response,  next: NextFunction) => {
-    return res.status(200).json({
-        error: 'Error calling the external API',
-        message: "API Is working",
-        code:200
-    });
-}
 
 
-const userOrderedItems = async(req: Request, res: Response,  next: NextFunction) => {
-    return res.status(200).json({
-        error: 'Error calling the external API',
-        message: "API Is working",
-        code:200
-    });
-}
+
+const userBasedNutritionFilters = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { userID:userId, filterDate } = req.body;
+
+        if (!userId) {
+            return res.status(400).json({
+                error: 'User ID is required',
+                message: 'Please provide a valid user ID',
+                code: 400
+            });
+        }
+
+        let query: any = { userID: userId };
+
+        if (filterDate) {
+            const makeFilterDate = new Date(filterDate);
+
+            makeFilterDate.setHours(0, 0, 0, 0);
+
+            query.orderDate = {
+                $gte: makeFilterDate,
+                $lt: new Date(makeFilterDate.getTime() + 24 * 60 * 60 * 1000)
+            };
+        }
+
+        const orders = await UserFoodItemsModel.find(query);
+
+        if (!orders || orders.length === 0) {
+            return res.status(404).json({
+                error: 'No items found',
+                message: 'No items found for the given user or date.',
+                code: 404
+            });
+        }
+
+
+        return res.status(200).json({
+            message: 'Successfully fetched user-based orders',
+            data: orders,
+            code: 200
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            error: 'Internal Server Error',
+            message: 'An error occurred while fetching orders.',
+            code: 500
+        });
+    }
+};
 
 
 const userFavouriteItems = async(req: Request, res: Response,  next: NextFunction) => {
@@ -126,8 +223,7 @@ const userFavouriteItems = async(req: Request, res: Response,  next: NextFunctio
 export default {
     nutritionSearch,
     saveUserNutrition,
-    updateUserNutritionDateTime,
-    userDayBasedNutritionData,
-    userOrderedItems,
+    updateUserNutritionData,
+    userBasedNutritionFilters,
     userFavouriteItems
 };

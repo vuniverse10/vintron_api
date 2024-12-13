@@ -14,8 +14,8 @@ router.get<{}, MessageResponse>("/", (req, res) => {
 });
 router.get("/nutrition-search", nutritionAction.nutritionSearch);
 router.post("/save-nutrition-item", nutritionAction.saveUserNutrition);
-router.post("/change-nutrition-date-time", nutritionAction.updateUserNutritionDateTime);
-router.post("/get-daybased-nutrion-data", nutritionAction.userDayBasedNutritionData);
-router.get("/get-user-last-added-items", nutritionAction.userOrderedItems);
+router.post("/update-nutrition-item-by-user", nutritionAction.updateUserNutritionData);
+router.post("/user-nutrition-filters", nutritionAction.userBasedNutritionFilters);
+
 router.get("/favourite-items", nutritionAction.userFavouriteItems);
 export default router;
