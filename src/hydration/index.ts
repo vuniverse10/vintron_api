@@ -11,20 +11,16 @@ router.get<{}, MessageResponse>("/", (req, res) => {
     message: "Hydration-🥤-Section",
   });
 });
-router.get("/nutrition-search", hydrationAction.nutritionSearch);
-router.post("/save-nutrition-item", hydrationAction.saveUserNutrition);
 router.post(
-  "/update-nutrition-item-by-user",
-  hydrationAction.updateUserNutritionData
+  "/fetch-water-remainder-details",
+  hydrationAction.fetchUserWaterRemainder
 );
+router.post("/save-water-remainder", hydrationAction.saveUserWaterRemainder);
+router.post("/save-water-intake", hydrationAction.saveUserWaterIntake);
 router.post(
-  "/user-nutrition-filters",
-  hydrationAction.userBasedNutritionFilters
+  "/hydration-statistics",
+  hydrationAction.userDayBasedWaterStatistics
 );
+router.post("/hydration-reports", hydrationAction.userWaterFilters);
 
-router.post("/favorite-items", hydrationAction.userFavoriteItems);
-router.post(
-  "/day-based-nutrition-data",
-  hydrationAction.userDayBasedNutritionData
-);
 export default router;

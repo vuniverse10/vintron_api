@@ -20,7 +20,8 @@ import MessageResponse from "./interfaces/MessageResponse";
 import mongoose from "mongoose";
 import config from "./config/config";
 import logging from "./config/logging";
-import nutrition from './nutrition';
+import nutrition from "./nutrition";
+import hydration from "./hydration";
 const nodemailer = require("nodemailer");
 
 const bodyParser = require("body-parser");
@@ -83,7 +84,8 @@ app.get<{}, MessageResponse>("/", (req, res) => {
 
 app.use("/v1", api);
 app.use("/user/v1", user);
-app.use('/nutrition/v1/',nutrition);
+app.use("/nutrition/v1/", nutrition);
+app.use("/hydration/v1/", hydration);
 app.use(middlewares.notFound);
 app.use(middlewares.errorHandler);
 

@@ -68,3 +68,11 @@ export const errorResponse = (
   message,
   errors,
 });
+
+export const convertMlTOLiters = (ml: number) => {
+  if (ml) {
+    return ml / 1000;
+  } else {
+    return 0;
+  }
+};
