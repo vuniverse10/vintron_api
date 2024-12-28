@@ -20,7 +20,7 @@ import MessageResponse from "./interfaces/MessageResponse";
 import mongoose from "mongoose";
 import config from "./config/config";
 import logging from "./config/logging";
-import nutrition from "./nutrition";
+//import nutrition from "./nutrition";
 import hydration from "./hydration";
 const nodemailer = require("nodemailer");
 
@@ -331,7 +331,7 @@ const calculateAge = (dob: any) => {
 };
 app.use("/v1", api);
 app.use("/user/v1", user);
-app.use("/nutrition/v1/", nutrition);
+//app.use("/nutrition/v1/", nutrition);
 app.use("/hydration/v1/", hydration);
 app.get("/api/heights", (req, res) => {
   return res.status(200).json({
