@@ -23,16 +23,36 @@ import { Workout } from "../excel-import/workout.schema";
 export class WorkoutController {
   constructor(private readonly workoutService: WorkoutService) {}
 
-  @Get("search-workouts")
-  async getWorkouts(@Query() filters: any): Promise<Workout[]> {
-    return this.workoutService.searchWorkOuts(filters);
-  }
-
   @Post("age-calculator")
   ageCalculator(@Body() body: { dob: string }) {
     const dob = new Date(body.dob);
     const age = this.calculateAge(dob);
     return age;
+  }
+
+  @Post("fetch-categories")
+  fetchFitnessLevelCategories(@Body() body: { fitnessLevel: string }) {
+    console.log(body);
+    return this.workoutService.fitnessLevelBasedCategories(body.fitnessLevel);
+  }
+
+  @Get("workouts-unique-equipments")
+  workoutsUniqueEquipments() {
+    return this.workoutService.fetchWorkoutsUniqueEquipments();
+  }
+
+  @Post("workout-equipments")
+  workoutEquipments(@Body() body: { fitnessLevel: string; category: string }) {
+    const payloadRequest = {
+      category: body.fitnessLevel,
+      fitnessLevel: body.fitnessLevel,
+    };
+    return this.workoutService.filterWorkoutEquipments(payloadRequest);
+  }
+
+  @Get("search-workouts")
+  async getWorkouts(@Query() filters: any): Promise<Workout[]> {
+    return this.workoutService.searchWorkOuts(filters);
   }
 
   private calculateAge(dob: Date): { age: string | number; dob: Date } {

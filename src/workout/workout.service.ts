@@ -300,4 +300,159 @@ export class WorkoutService {
     const workouts = await this.workoutModel.find().exec();
     return workouts;
   }
+
+  async fitnessLevelBasedCategories(fitnessLevel: string): Promise<{
+    code: number;
+    message: string;
+    data: { category: string }[];
+  }> {
+    try {
+      let searchFitnessLevel: string;
+      switch (fitnessLevel.toLowerCase()) {
+        case "intermediate":
+          searchFitnessLevel = "intermediate";
+          break;
+        case "beginner":
+          searchFitnessLevel = "beginner";
+          break;
+        case "advanced":
+          searchFitnessLevel = "advanced";
+          break;
+        case "elite":
+          searchFitnessLevel = "elite";
+          break;
+        default:
+          searchFitnessLevel = "";
+      }
+
+      const aggregationPipeline = [
+        {
+          $match: {
+            ...(searchFitnessLevel
+              ? { workout_level: new RegExp(searchFitnessLevel, "i") }
+              : {}),
+          },
+        },
+        {
+          $group: {
+            _id: "$category",
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            category: "$_id",
+          },
+        },
+      ];
+
+      const workouts = await this.workoutModel
+        .aggregate(aggregationPipeline)
+        .exec();
+
+      return this.serviceResponse.apiResponse<{ category: string }[]>(
+        workouts,
+        "Workout Categories"
+      );
+    } catch (error) {
+      console.log(error);
+      return this.serviceResponse.errorResponse("Workout Categories");
+    }
+  }
+
+  async fetchWorkoutsUniqueEquipments(): Promise<{
+    code: number;
+    message: string;
+    data: { equipment: string }[];
+  }> {
+    try {
+      const aggregationPipeline = [
+        {
+          $group: {
+            _id: "$equipment",
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            equipment: "$_id",
+          },
+        },
+      ];
+
+      const workouts = await this.workoutModel
+        .aggregate(aggregationPipeline)
+        .exec();
+
+      return this.serviceResponse.apiResponse<{ equipment: string }[]>(
+        workouts,
+        "Workout Equipments"
+      );
+    } catch (error) {
+      console.log(error);
+      return this.serviceResponse.errorResponse("Workout Equipments");
+    }
+  }
+
+  async filterWorkoutEquipments(filters: {
+    fitnessLevel: string;
+    category: string;
+  }): Promise<{
+    code: number;
+    message: string;
+    data: { category: string }[];
+  }> {
+    try {
+      let searchFitnessLevel: string;
+      switch (filters.fitnessLevel.toLowerCase()) {
+        case "intermediate":
+          searchFitnessLevel = "intermediate";
+          break;
+        case "beginner":
+          searchFitnessLevel = "beginner";
+          break;
+        case "advanced":
+          searchFitnessLevel = "advanced";
+          break;
+        case "elite":
+          searchFitnessLevel = "elite";
+          break;
+        default:
+          searchFitnessLevel = "";
+      }
+
+      const aggregationPipeline = [
+        {
+          $match: {
+            ...(searchFitnessLevel
+              ? { workout_level: new RegExp(searchFitnessLevel, "i") }
+              : {}),
+          },
+        },
+        {
+          $group: {
+            _id: "$category",
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            category: "$_id",
+          },
+        },
+      ];
+
+      const workouts = await this.workoutModel
+        .aggregate(aggregationPipeline)
+        .exec();
+
+      return this.serviceResponse.apiResponse<{ category: string }[]>(
+        workouts,
+        "Workout Categories"
+      );
+    } catch (error) {
+      console.log(error);
+      return this.serviceResponse.errorResponse("Workout Categories");
+    }
+  }
 }
