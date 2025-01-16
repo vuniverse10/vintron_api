@@ -32,14 +32,15 @@ export class WorkoutController {
   ageCalculator(@Body() body: { dob: string }) {
     const dob = new Date(body.dob);
     const age = this.calculateAge(dob);
-    return { age };
+    return age;
   }
 
-  private calculateAge(dob: Date): number {
+  private calculateAge(dob: Date): { age: string | number; dob: Date } {
     const today = new Date();
     let age = today.getFullYear() - dob.getFullYear();
     const month = today.getMonth();
     const day = today.getDate();
+
     if (
       month < dob.getMonth() ||
       (month === dob.getMonth() && day < dob.getDate())
@@ -47,7 +48,10 @@ export class WorkoutController {
       age--;
     }
 
-    return age;
+    return {
+      age: Number(age),
+      dob: dob,
+    };
   }
 
   @Get("workouts-sections")
