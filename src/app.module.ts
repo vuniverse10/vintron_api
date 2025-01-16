@@ -1,22 +1,22 @@
-import { Module } from '@nestjs/common';
-import { SentryGlobalFilter, SentryModule } from '@sentry/nestjs/setup';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { ConfigModule } from '@nestjs/config';
-import configuration from 'config/configuration';
-import { MongooseModule } from '@nestjs/mongoose';
-import { HttpModule } from '@nestjs/axios';
-import { Msg91Module } from './msg91';
-import { APP_FILTER, APP_GUARD } from '@nestjs/core';
-import { AuthGuard, AuthModule } from './auth';
-import { UsersModule } from './users';
-import { JwtModule } from '@nestjs/jwt';
-import { WorkoutModule } from './workout/workout.module';
-import { ExcelImportService } from './excel-import/excel-import.service';
-import { ExcelImportController } from './excel-import/excel-import.controller';
-import { MulterModule } from '@nestjs/platform-express';
-import * as multer from 'multer'; // Import multer here
-import { WorkoutSchema } from './excel-import/workout.schema';
+import { Module } from "@nestjs/common";
+import { SentryGlobalFilter, SentryModule } from "@sentry/nestjs/setup";
+import { AppController } from "./app.controller";
+import { AppService } from "./app.service";
+import { ConfigModule } from "@nestjs/config";
+import configuration from "config/configuration";
+import { MongooseModule } from "@nestjs/mongoose";
+import { HttpModule } from "@nestjs/axios";
+import { Msg91Module } from "./msg91";
+import { APP_FILTER, APP_GUARD } from "@nestjs/core";
+import { AuthGuard, AuthModule } from "./auth";
+import { UsersModule } from "./users";
+import { JwtModule } from "@nestjs/jwt";
+import { WorkoutModule } from "./workout/workout.module";
+import { ExcelImportService } from "./excel-import/excel-import.service";
+import { ExcelImportController } from "./excel-import/excel-import.controller";
+import { MulterModule } from "@nestjs/platform-express";
+import * as multer from "multer"; // Import multer here
+import { WorkoutSchema } from "./excel-import/workout.schema";
 
 @Module({
   imports: [
@@ -41,7 +41,7 @@ import { WorkoutSchema } from './excel-import/workout.schema';
     MulterModule.register({
       storage: multer.memoryStorage(),
     }),
-    MongooseModule.forFeature([{ name: 'Workout', schema: WorkoutSchema }]),
+    MongooseModule.forFeature([{ name: "Workout", schema: WorkoutSchema }]),
   ],
   controllers: [AppController, ExcelImportController],
   providers: [

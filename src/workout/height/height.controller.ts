@@ -6,12 +6,12 @@ import {
   Param,
   Put,
   Delete,
-} from '@nestjs/common';
-import { HeightService } from '../services/height.service';
-import { CreateHeightDto } from '../dto/create-height.dto';
-import { Height } from '../schemas/height.schema';
+} from "@nestjs/common";
+import { HeightService } from "../services/height.service";
+import { CreateHeightDto } from "../dto/create-height.dto";
+import { Height } from "../schemas/height.schema";
 
-@Controller('heights')
+@Controller("heights")
 export class HeightController {
   constructor(private readonly heightService: HeightService) {}
 
@@ -21,31 +21,35 @@ export class HeightController {
   }
 
   @Get()
-  findAll(): Promise<{ height: string; value: number }[]> {
+  async findAll(): Promise<{
+    code: number;
+    message: string;
+    data: { height: string; value: number }[];
+  }> {
     return this.heightService.fetchHeights();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string): Promise<Height> {
+  @Get(":id")
+  findOne(@Param("id") id: string): Promise<Height> {
     return this.heightService.findOne(id);
   }
 
-  @Put(':id')
+  @Put(":id")
   update(
-    @Param('id') id: string,
-    @Body() updateHeightDto: CreateHeightDto,
+    @Param("id") id: string,
+    @Body() updateHeightDto: CreateHeightDto
   ): Promise<Height> {
     return this.heightService.update(id, updateHeightDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string): Promise<void> {
+  @Delete(":id")
+  remove(@Param("id") id: string): Promise<void> {
     return this.heightService.remove(id);
   }
 
-  @Post('bulk-insert')
+  @Post("bulk-insert")
   async bulkInsert(
-    @Body() heights: { height: string; value: number }[],
+    @Body() heights: { height: string; value: number }[]
   ): Promise<any> {
     return this.heightService.bulkCreate(heights);
   }

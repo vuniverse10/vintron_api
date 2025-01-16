@@ -1,24 +1,24 @@
 // src/workout/workout.service.ts
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
 
-import { Workout } from '../excel-import/workout.schema';
-import { Model } from 'mongoose';
-import { Height } from './schemas/height.schema';
+import { Workout } from "../excel-import/workout.schema";
+import { Model } from "mongoose";
+import { Height } from "./schemas/height.schema";
 
-import { PersonalTrainingService } from './services/personalTraining.service';
-import { FitnessLevelService } from './services/fitness-level.service';
-import { BodyFocusAreaService } from './services/body-focus-area.service';
-import { WorkoutPreferService } from './services/workout-prefer.service';
-import { WorkoutsPreferTimingsService } from './services/workouts-prefer-timings.service';
-import { workoutPlanWeekService } from './services/workoutPlanWeek.service';
-import { WorkoutPlanDurationService } from './services/workout-plan-duration.service';
-
+import { PersonalTrainingService } from "./services/personalTraining.service";
+import { FitnessLevelService } from "./services/fitness-level.service";
+import { BodyFocusAreaService } from "./services/body-focus-area.service";
+import { WorkoutPreferService } from "./services/workout-prefer.service";
+import { WorkoutsPreferTimingsService } from "./services/workouts-prefer-timings.service";
+import { workoutPlanWeekService } from "./services/workoutPlanWeek.service";
+import { WorkoutPlanDurationService } from "./services/workout-plan-duration.service";
+import { ServiceResponse } from "@common/service-response";
 @Injectable()
 export class WorkoutService {
   constructor(
-    @InjectModel('Workout') private readonly workoutModel: Model<Workout>,
-    @InjectModel('Height') private readonly heightModel: Model<Height>,
+    @InjectModel("Workout") private readonly workoutModel: Model<Workout>,
+    @InjectModel("Height") private readonly heightModel: Model<Height>,
     private readonly personalTrainingService: PersonalTrainingService,
     private readonly fitnessLevelService: FitnessLevelService,
     private readonly bodyFocusAreaService: BodyFocusAreaService,
@@ -26,6 +26,7 @@ export class WorkoutService {
     private readonly workoutsPreferTimingsService: WorkoutsPreferTimingsService,
     private readonly workoutPlanWeekService: workoutPlanWeekService,
     private readonly workoutPlanDurationService: WorkoutPlanDurationService,
+    private readonly serviceResponse: ServiceResponse
   ) {}
 
   async searchWorkOuts(filters: any): Promise<Workout[]> {
@@ -33,8 +34,8 @@ export class WorkoutService {
       const query: any = {};
 
       for (const key in filters) {
-        if (filters[key] !== undefined && filters[key] !== '') {
-          query[key] = new RegExp(filters[key], 'i');
+        if (filters[key] !== undefined && filters[key] !== "") {
+          query[key] = new RegExp(filters[key], "i");
         }
       }
 
@@ -42,8 +43,8 @@ export class WorkoutService {
 
       return workouts;
     } catch (error) {
-      console.error('Error fetching workouts:', error);
-      throw new Error('Failed to fetch workout data');
+      console.error("Error fetching workouts:", error);
+      throw new Error("Failed to fetch workout data");
     }
   }
 
@@ -55,42 +56,42 @@ export class WorkoutService {
         {
           $match: {
             ...(fitnessLevel
-              ? { workout_level: new RegExp(fitnessLevel, 'i') }
+              ? { workout_level: new RegExp(fitnessLevel, "i") }
               : {}),
             /*  ...(bodyAreaToFocus
               ? { keywords: new RegExp(bodyAreaToFocus, 'i') }
               : {}),
               */
-            ...(category ? { category: new RegExp(category, 'i') } : {}),
+            ...(category ? { category: new RegExp(category, "i") } : {}),
           },
         },
 
         {
           $group: {
-            _id: '$equipment',
-            sets: { $addToSet: '$sets' }, // Collect unique sets
-            reps: { $addToSet: '$reps' }, // Collect unique reps
+            _id: "$equipment",
+            sets: { $addToSet: "$sets" }, // Collect unique sets
+            reps: { $addToSet: "$reps" }, // Collect unique reps
           },
         },
         {
           $project: {
             _id: 0,
-            equipment: '$_id',
+            equipment: "$_id",
             sets: {
               $reduce: {
                 input: {
                   $map: {
-                    input: '$sets',
-                    as: 'set',
-                    in: { $toString: '$$set' },
+                    input: "$sets",
+                    as: "set",
+                    in: { $toString: "$$set" },
                   },
                 },
-                initialValue: '',
+                initialValue: "",
                 in: {
                   $concat: [
-                    '$$value',
-                    { $cond: [{ $eq: ['$$value', ''] }, '', ', '] },
-                    '$$this',
+                    "$$value",
+                    { $cond: [{ $eq: ["$$value", ""] }, "", ", "] },
+                    "$$this",
                   ],
                 },
               },
@@ -99,22 +100,22 @@ export class WorkoutService {
               $reduce: {
                 input: {
                   $map: {
-                    input: '$reps',
-                    as: 'rep',
-                    in: { $toString: '$$rep' },
+                    input: "$reps",
+                    as: "rep",
+                    in: { $toString: "$$rep" },
                   },
                 },
-                initialValue: '',
+                initialValue: "",
                 in: {
                   $concat: [
-                    '$$value',
-                    { $cond: [{ $eq: ['$$value', ''] }, '', ', '] },
-                    '$$this',
+                    "$$value",
+                    { $cond: [{ $eq: ["$$value", ""] }, "", ", "] },
+                    "$$this",
                   ],
                 },
               },
             },
-            videoURL: { $literal: 'https://dummyvideourl.com/sample.mp4' },
+            videoURL: { $literal: "https://dummyvideourl.com/sample.mp4" },
           },
         },
       ];
@@ -125,8 +126,8 @@ export class WorkoutService {
 
       return workouts;
     } catch (error) {
-      console.error('Error fetching workouts:', error);
-      throw new Error('Failed to fetch workout data');
+      console.error("Error fetching workouts:", error);
+      throw new Error("Failed to fetch workout data");
     }
   }
 
@@ -139,10 +140,10 @@ export class WorkoutService {
           $addFields: {
             set_break_seconds: {
               $cond: [
-                { $regexMatch: { input: '$set_break', regex: /^[0-9]+ sec$/ } },
+                { $regexMatch: { input: "$set_break", regex: /^[0-9]+ sec$/ } },
                 {
                   $toInt: {
-                    $arrayElemAt: [{ $split: ['$set_break', ' '] }, 0],
+                    $arrayElemAt: [{ $split: ["$set_break", " "] }, 0],
                   },
                 },
                 0, // Default to 0 if `set_break` is invalid
@@ -164,7 +165,7 @@ export class WorkoutService {
           ? [
               {
                 $match: {
-                  workout_level: new RegExp(fitnessLevel, 'i'),
+                  workout_level: new RegExp(fitnessLevel, "i"),
                 },
               },
             ]
@@ -172,19 +173,19 @@ export class WorkoutService {
 
         {
           $group: {
-            _id: '$category',
-            total_set_break_seconds: { $sum: '$set_break_seconds' },
+            _id: "$category",
+            total_set_break_seconds: { $sum: "$set_break_seconds" },
           },
         },
 
         {
           $project: {
             _id: 0,
-            category: '$_id',
+            category: "$_id",
             total_set_break: {
-              seconds: '$total_set_break_seconds',
-              minutes: { $divide: ['$total_set_break_seconds', 60] },
-              hours: { $divide: ['$total_set_break_seconds', 3600] },
+              seconds: "$total_set_break_seconds",
+              minutes: { $divide: ["$total_set_break_seconds", 60] },
+              hours: { $divide: ["$total_set_break_seconds", 3600] },
             },
           },
         },
@@ -197,15 +198,18 @@ export class WorkoutService {
       return results;
     } catch (error) {
       console.error(
-        'Error fetching unique categories with set break sum:',
-        error,
+        "Error fetching unique categories with set break sum:",
+        error
       );
-      throw new Error('Failed to fetch unique categories with set break sum');
+      throw new Error("Failed to fetch unique categories with set break sum");
     }
   }
 
-  async fetchAllWorkoutSections() {
-    console.log('Welcome to All Sections..!');
+  async fetchAllWorkoutSections(): Promise<{
+    code: number;
+    message: string;
+    data: any;
+  }> {
     try {
       const personalTrainingData =
         await this.personalTrainingService.fetchPersonalTrainingList();
@@ -235,9 +239,14 @@ export class WorkoutService {
         workout_plan_weeks: workoutPlanWeekData,
         workout_plan_duration: workoutPlanDurationsData,
       };
-      return responseData;
+
+      return this.serviceResponse.workoutPreferenceResponse<any>(
+        responseData,
+        "Workout Sections"
+      );
     } catch (error) {
       console.log(error);
+      return this.serviceResponse.errorResponse("Workout Sections");
     }
   }
 
@@ -249,13 +258,13 @@ export class WorkoutService {
         {
           $match: {
             ...(fitnessLevel
-              ? { workout_level: new RegExp(fitnessLevel, 'i') }
+              ? { workout_level: new RegExp(fitnessLevel, "i") }
               : {}),
             /*  ...(bodyAreaToFocus
               ? { keywords: new RegExp(bodyAreaToFocus, 'i') }
               : {}),
               */
-            ...(category ? { category: new RegExp(category, 'i') } : {}),
+            ...(category ? { category: new RegExp(category, "i") } : {}),
           },
         },
         {
@@ -271,7 +280,7 @@ export class WorkoutService {
             set_break: 1,
             equipment: 1,
             workout_level: 1,
-            videoURL: { $literal: 'https://dummyvideourl.com/sample.mp4' },
+            videoURL: { $literal: "https://dummyvideourl.com/sample.mp4" },
           },
         },
       ];
@@ -282,8 +291,13 @@ export class WorkoutService {
 
       return workouts;
     } catch (error) {
-      console.error('Error fetching workouts:', error);
-      throw new Error('Failed to fetch workout data');
+      console.error("Error fetching workouts:", error);
+      throw new Error("Failed to fetch workout data");
     }
+  }
+
+  async fetchAllWorkouts() {
+    const workouts = await this.workoutModel.find().exec();
+    return workouts;
   }
 }

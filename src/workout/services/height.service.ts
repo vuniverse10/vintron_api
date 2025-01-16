@@ -1,13 +1,15 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Height } from '../schemas/height.schema';
-import { CreateHeightDto } from '../dto/create-height.dto';
+import { Injectable } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
+import { Height } from "../schemas/height.schema";
+import { CreateHeightDto } from "../dto/create-height.dto";
+import { ServiceResponse } from "@common/service-response";
 
 @Injectable()
 export class HeightService {
   constructor(
-    @InjectModel('Height') private readonly heightModel: Model<Height>,
+    @InjectModel("Height") private readonly heightModel: Model<Height>,
+    private readonly serviceResponse: ServiceResponse
   ) {}
 
   async create(createHeightDto: CreateHeightDto): Promise<Height> {
@@ -42,7 +44,14 @@ export class HeightService {
     return await this.heightModel.insertMany(formattedHeights);
   }
 
-  async fetchHeights(): Promise<{ height: string; value: number }[]> {
-    return this.heightModel.find({}, 'height value').exec();
+  async fetchHeights(): Promise<{
+    code: number;
+    message: string;
+    data: { height: string; value: number }[];
+  }> {
+    const result = await this.heightModel.find({}, "height value").exec();
+    return this.serviceResponse.apiResponse<
+      { height: string; value: number }[]
+    >(result, "Height");
   }
 }
