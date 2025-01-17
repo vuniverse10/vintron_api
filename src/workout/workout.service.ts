@@ -400,7 +400,7 @@ export class WorkoutService {
   }): Promise<{
     code: number;
     message: string;
-    data: { category: string }[];
+    data: { equipment: string }[];
   }> {
     try {
       let searchFitnessLevel: string;
@@ -431,13 +431,17 @@ export class WorkoutService {
         },
         {
           $group: {
-            _id: "$category",
+            _id: "$equipment",
           },
         },
         {
           $project: {
             _id: 0,
-            category: "$_id",
+            equipment: "$_id",
+            thumbnail: {
+              $literal:
+                "https://vintron-storage.blr1.cdn.digitaloceanspaces.com/thumbnails/pexels-arturo-albarran-1951361020-30191517.jpg",
+            },
           },
         },
       ];
@@ -446,13 +450,290 @@ export class WorkoutService {
         .aggregate(aggregationPipeline)
         .exec();
 
-      return this.serviceResponse.apiResponse<{ category: string }[]>(
+      return this.serviceResponse.apiResponse<{ equipment: string }[]>(
         workouts,
-        "Workout Categories"
+        "Workout Exercises"
       );
     } catch (error) {
       console.log(error);
-      return this.serviceResponse.errorResponse("Workout Categories");
+      return this.serviceResponse.errorResponse("Workout Exercises");
+    }
+  }
+
+  async specialWorkoutData(filters: any): Promise<{
+    code: number;
+    message: string;
+    data: any;
+  }> {
+    try {
+      const { fitnessLevel, bodyAreaToFocus, category } = filters;
+
+      const aggregationPipeline = [
+        {
+          $project: {
+            video_exercise_title: 1,
+            videoURL: {
+              $literal:
+                "https://vintron-storage.blr1.cdn.digitaloceanspaces.com/yoga/videos/1736404189198-01%20Samasthithi.mp4",
+            },
+            thumbnail: {
+              $literal:
+                "https://vintron-storage.blr1.cdn.digitaloceanspaces.com/thumbnails/pexels-arturo-albarran-1951361020-30191517.jpg",
+            },
+          },
+        },
+        {
+          $limit: 10,
+        },
+      ];
+
+      const workouts = await this.workoutModel
+        .aggregate(aggregationPipeline)
+        .exec();
+
+      const returnResponse = {
+        timeSlot: "30 Mins",
+        keywords: ["Back, chest,Core", "Arms"],
+        videoList: workouts,
+      };
+
+      return {
+        code: 200,
+        message: "Fetching Special workout information",
+        data: returnResponse,
+      };
+    } catch (error) {
+      console.error("Error fetching workouts:", error);
+      throw new Error("Failed to fetch workout data");
+    }
+  }
+
+  async specialWorkoutExercisesData(filters: any): Promise<{
+    code: number;
+    message: string;
+    data: any;
+  }> {
+    try {
+      const { fitnessLevel, bodyAreaToFocus, category } = filters;
+
+      const aggregationPipeline = [
+        {
+          $project: {
+            video_exercise_title: 1,
+            short_description: 1,
+            category: 1,
+            keywords: 1,
+            reps: 1,
+            reps_break: 1,
+            sets: 1,
+            weights: 1,
+            set_break: 1,
+            equipment: 1,
+            workout_level: 1,
+            videoURL: {
+              $literal:
+                "https://vintron-storage.blr1.cdn.digitaloceanspaces.com/yoga/videos/1736404189198-01%20Samasthithi.mp4",
+            },
+            thumbnail: {
+              $literal:
+                "https://vintron-storage.blr1.cdn.digitaloceanspaces.com/thumbnails/pexels-arturo-albarran-1951361020-30191517.jpg",
+            },
+          },
+        },
+        {
+          $limit: 10,
+        },
+      ];
+
+      const exercisesData = await this.workoutModel
+        .aggregate(aggregationPipeline)
+        .exec();
+
+      let warmupData;
+      let warmupTime;
+      let coolDownData;
+      let coolDownTime;
+
+      const equipementSevice = await this.filterWorkoutEquipments(filters);
+      const warmupApiRequest = await this.warmupExerciseList(filters);
+      if (warmupApiRequest && warmupApiRequest.length > 0) {
+        warmupData = warmupApiRequest;
+        warmupTime = "5 Mins";
+      } else {
+        warmupData = [];
+        warmupTime = "0 Mins";
+      }
+      const coolDownApiRequest = await this.coolDownExerciseList(filters);
+
+      if (coolDownApiRequest && coolDownApiRequest.length > 0) {
+        coolDownData = coolDownApiRequest;
+        coolDownTime = "5 Mins";
+      } else {
+        coolDownData = [];
+        coolDownTime = "0 Mins";
+      }
+
+      const returnResponse = {
+        timeSlot: "30 Mins",
+        title: "Upper Body",
+        equipments: equipementSevice.data,
+        exercises: exercisesData,
+        warmup: warmupData,
+        warmupTime: warmupTime,
+        coolDown: coolDownData,
+        coolDownTime: coolDownTime,
+      };
+
+      return {
+        code: 200,
+        message: "Fetching Special workout information",
+        data: returnResponse,
+      };
+    } catch (error) {
+      console.error("Error fetching workouts:", error);
+      throw new Error("Failed to fetch workout data");
+    }
+  }
+
+  async warmupExerciseList(filters: {
+    fitnessLevel: string;
+    category: string;
+  }): Promise<any> {
+    try {
+      let searchFitnessLevel: string;
+      switch (filters.fitnessLevel.toLowerCase()) {
+        case "intermediate":
+          searchFitnessLevel = "intermediate";
+          break;
+        case "beginner":
+          searchFitnessLevel = "beginner";
+          break;
+        case "advanced":
+          searchFitnessLevel = "advanced";
+          break;
+        case "elite":
+          searchFitnessLevel = "elite";
+          break;
+        default:
+          searchFitnessLevel = "";
+      }
+
+      const aggregationPipeline = [
+        {
+          $match: {
+            ...(searchFitnessLevel
+              ? { workout_level: new RegExp(searchFitnessLevel, "i") }
+              : {}),
+            category: new RegExp("Warmups", "i"),
+          },
+        },
+        {
+          $project: {
+            video_exercise_title: 1,
+            short_description: 1,
+            category: 1,
+            keywords: 1,
+            reps: 1,
+            reps_break: 1,
+            sets: 1,
+            weights: 1,
+            set_break: 1,
+            equipment: 1,
+            workout_level: 1,
+            videoURL: {
+              $literal:
+                "https://vintron-storage.blr1.cdn.digitaloceanspaces.com/yoga/videos/1736404189198-01%20Samasthithi.mp4",
+            },
+            thumbnail: {
+              $literal:
+                "https://vintron-storage.blr1.cdn.digitaloceanspaces.com/thumbnails/pexels-arturo-albarran-1951361020-30191517.jpg",
+            },
+          },
+        },
+        {
+          $limit: 5,
+        },
+      ];
+
+      const workouts = await this.workoutModel
+        .aggregate(aggregationPipeline)
+        .exec();
+      console.log("Warmup ", workouts);
+      return workouts;
+    } catch (error) {
+      console.log(error);
+      return this.serviceResponse.errorResponse("Warmup Exercises");
+    }
+  }
+
+  async coolDownExerciseList(filters: {
+    fitnessLevel: string;
+    category: string;
+  }): Promise<any> {
+    try {
+      let searchFitnessLevel: string;
+      switch (filters.fitnessLevel.toLowerCase()) {
+        case "intermediate":
+          searchFitnessLevel = "intermediate";
+          break;
+        case "beginner":
+          searchFitnessLevel = "beginner";
+          break;
+        case "advanced":
+          searchFitnessLevel = "advanced";
+          break;
+        case "elite":
+          searchFitnessLevel = "elite";
+          break;
+        default:
+          searchFitnessLevel = "";
+      }
+
+      const aggregationPipeline = [
+        {
+          $match: {
+            ...(searchFitnessLevel
+              ? { workout_level: new RegExp(searchFitnessLevel, "i") }
+              : {}),
+            category: new RegExp("Stretching", "i"),
+          },
+        },
+        {
+          $project: {
+            video_exercise_title: 1,
+            short_description: 1,
+            category: 1,
+            keywords: 1,
+            reps: 1,
+            reps_break: 1,
+            sets: 1,
+            weights: 1,
+            set_break: 1,
+            equipment: 1,
+            workout_level: 1,
+            videoURL: {
+              $literal:
+                "https://vintron-storage.blr1.cdn.digitaloceanspaces.com/yoga/videos/1736404189198-01%20Samasthithi.mp4",
+            },
+            thumbnail: {
+              $literal:
+                "https://vintron-storage.blr1.cdn.digitaloceanspaces.com/thumbnails/pexels-arturo-albarran-1951361020-30191517.jpg",
+            },
+          },
+        },
+        {
+          $limit: 5,
+        },
+      ];
+
+      const workouts = await this.workoutModel
+        .aggregate(aggregationPipeline)
+        .exec();
+
+      return workouts;
+    } catch (error) {
+      console.log(error);
+      return this.serviceResponse.errorResponse("Cool Down Exercises");
     }
   }
 }

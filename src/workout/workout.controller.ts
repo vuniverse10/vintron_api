@@ -98,4 +98,76 @@ export class WorkoutController {
   async fetchAllWorkouts(): Promise<any> {
     return this.workoutService.fetchAllWorkouts();
   }
+
+  @Get("reps-list")
+  async repsList(): Promise<{
+    code: number;
+    message: string;
+    data: { _id: string; title: string; value: number }[];
+  }> {
+    try {
+      const reps = Array.from({ length: 100 }, (_, i) => {
+        const value = i + 1;
+        return {
+          _id: `${value}_${value}`,
+          title: `${value} Reps`,
+          value: value,
+        };
+      });
+
+      return {
+        code: 200,
+        message: "Repetitions list generated successfully",
+        data: reps,
+      };
+    } catch (error) {
+      console.error(error);
+      return {
+        code: 204,
+        message: "Failed to generate repetitions list",
+        data: [],
+      };
+    }
+  }
+
+  @Get("weights-list")
+  async weightsList(): Promise<{
+    code: number;
+    message: string;
+    data: { _id: string; title: string; value: number }[];
+  }> {
+    try {
+      const reps = Array.from({ length: 100 }, (_, i) => {
+        const value = i + 1;
+        return {
+          _id: `${value}_${value}`,
+          title: `${value} Kg`,
+          value: value,
+        };
+      });
+
+      return {
+        code: 200,
+        message: "Weights list  successfully",
+        data: reps,
+      };
+    } catch (error) {
+      console.error(error);
+      return {
+        code: 204,
+        message: "Failed to  weights list",
+        data: [],
+      };
+    }
+  }
+
+  @Post("special-workout")
+  specialWorkout(@Body() body) {
+    return this.workoutService.specialWorkoutData(body);
+  }
+
+  @Post("special-workout-data")
+  specialWorkoutInfo(@Body() body) {
+    return this.workoutService.specialWorkoutExercisesData(body);
+  }
 }
