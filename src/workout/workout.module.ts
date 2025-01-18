@@ -64,6 +64,11 @@ import { UserWorkoutService } from "./services/user-workout.services";
 import { UserWorkoutSchema, UserWorkout } from "./schemas/user-workout.schema";
 import { GoalSettingsController } from "./goal-settings/goal-settings.controller";
 import { ServiceResponse } from "@common/service-response";
+import { GoalSchema } from "./schemas/goal-settings/goal.schema";
+import { GoalService } from "./services/goal-settings/goal.service";
+import { HealRestrictionsController } from "./heal-restrictions/heal-restrictions.controller";
+import { HealthRestrictionsSchema } from "./schemas/goal-settings/health-restrictions.schema";
+import { HealthRestrictionsService } from "./services/goal-settings/health-restrictions.service";
 
 @Module({
   imports: [
@@ -79,6 +84,8 @@ import { ServiceResponse } from "@common/service-response";
       { name: "WorkoutPlanWeek", schema: WorkoutPlanWeekSchema },
       { name: "WorkoutPlanDuration", schema: WorkoutPlanDurationSchema },
       { name: "UserWorkout", schema: UserWorkoutSchema },
+      { name: "Goals", schema: GoalSchema },
+      { name: "HealthRestrictions", schema: HealthRestrictionsSchema },
     ]),
   ],
   providers: [
@@ -94,6 +101,8 @@ import { ServiceResponse } from "@common/service-response";
     WorkoutPlanDurationService,
     UserWorkoutService,
     ServiceResponse,
+    GoalService,
+    HealthRestrictionsService,
   ],
   controllers: [
     WorkoutController,
@@ -108,6 +117,7 @@ import { ServiceResponse } from "@common/service-response";
     WorkoutPlanDurationController,
     UserWorkoutsController,
     GoalSettingsController,
+    HealRestrictionsController,
   ],
 })
 export class WorkoutModule {}
