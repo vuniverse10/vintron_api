@@ -12,4 +12,19 @@ export class GoalSettingService {
     private readonly goalSettingModel: Model<GoalSettings>,
     private readonly serviceResponse: ServiceResponse
   ) {}
+
+  async create(
+    CreateGoalSettingDto: CreateGoalSettingDto
+  ): Promise<GoalSettings> {
+    const insertQueryRequest = new this.goalSettingModel(CreateGoalSettingDto);
+    return insertQueryRequest.save();
+  }
+
+  async findAll(): Promise<GoalSettings[]> {
+    return this.goalSettingModel.find().exec();
+  }
+
+  async findOne(id: string): Promise<GoalSettings> {
+    return this.goalSettingModel.findById(id).exec();
+  }
 }

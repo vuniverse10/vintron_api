@@ -69,6 +69,8 @@ import { GoalService } from "./services/goal-settings/goal.service";
 import { HealRestrictionsController } from "./heal-restrictions/heal-restrictions.controller";
 import { HealthRestrictionsSchema } from "./schemas/goal-settings/health-restrictions.schema";
 import { HealthRestrictionsService } from "./services/goal-settings/health-restrictions.service";
+import { GoalSettingsSchema } from "./schemas/goal-settings/goal-settings.schema";
+import { GoalSettingService } from "./services/goal-settings/goal-settings.service";
 
 @Module({
   imports: [
@@ -86,6 +88,7 @@ import { HealthRestrictionsService } from "./services/goal-settings/health-restr
       { name: "UserWorkout", schema: UserWorkoutSchema },
       { name: "Goals", schema: GoalSchema },
       { name: "HealthRestrictions", schema: HealthRestrictionsSchema },
+      { name: "GoalSettings", schema: GoalSettingsSchema },
     ]),
   ],
   providers: [
@@ -103,6 +106,7 @@ import { HealthRestrictionsService } from "./services/goal-settings/health-restr
     ServiceResponse,
     GoalService,
     HealthRestrictionsService,
+    GoalSettingService,
   ],
   controllers: [
     WorkoutController,
