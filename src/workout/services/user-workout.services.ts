@@ -4,17 +4,26 @@ import { Model } from "mongoose";
 import { UserWorkout } from "../schemas/user-workout.schema";
 import { UserWorkoutDTO } from "../dto/create-user-workout.dto";
 import { WorkoutPlanObjectiveService } from "./personal-objectives.service";
+import { UserWorkoutWeeklyPlanService } from "./user-workouts/user-workout-weekly-plan-exercises.services";
 @Injectable()
 export class UserWorkoutService {
   constructor(
     @InjectModel("UserWorkout")
     private readonly userWorkoutModel: Model<UserWorkout>,
-    private readonly workoutPlanObjectiveService: WorkoutPlanObjectiveService
+    private readonly workoutPlanObjectiveService: WorkoutPlanObjectiveService,
+    private readonly userWorkoutWeeklyPlanService: UserWorkoutWeeklyPlanService
   ) {}
 
   async create(UserWorkoutDTO: UserWorkoutDTO): Promise<UserWorkout> {
     const makeRequest = new this.userWorkoutModel(UserWorkoutDTO);
-    return makeRequest.save();
+    makeRequest.save();
+    /* Weekly Plan Related Section Start >>*/
+
+    await this.userWorkoutWeeklyPlanService.createWorkoutWeeklyPlan(
+      makeRequest
+    );
+    /*<< Weekly Plan Related Section Edn*/
+    return makeRequest;
   }
 
   async findAll(): Promise<UserWorkout[]> {

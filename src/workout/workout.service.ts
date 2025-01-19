@@ -736,4 +736,30 @@ export class WorkoutService {
       return this.serviceResponse.errorResponse("Cool Down Exercises");
     }
   }
+
+  async userWeeklyPlanWorkouts(): Promise<any> {
+    const aggregationPipeline = [
+      {
+        $project: {
+          video_exercise_title: 1,
+          videoURL: {
+            $literal:
+              "https://vintron-storage.blr1.cdn.digitaloceanspaces.com/yoga/videos/1736404189198-01%20Samasthithi.mp4",
+          },
+          thumbnail: {
+            $literal:
+              "https://vintron-storage.blr1.cdn.digitaloceanspaces.com/thumbnails/pexels-arturo-albarran-1951361020-30191517.jpg",
+          },
+        },
+      },
+      {
+        $limit: 1,
+      },
+    ];
+
+    const workouts = await this.workoutModel
+      .aggregate(aggregationPipeline)
+      .exec();
+    return workouts;
+  }
 }

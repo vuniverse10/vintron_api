@@ -76,6 +76,12 @@ import {
   WorkoutPlanObjective,
   WorkoutPlanObjectiveSchema,
 } from "./schemas/workout-plan-objectives.schema";
+
+import {
+  UserWorkoutWeeklyPlan,
+  UserWorkoutWeeklyPlanSchema,
+} from "./schemas/user-workouts/user-workout-weekly-plan.schema";
+import { UserWorkoutWeeklyPlanService } from "./services/user-workouts/user-workout-weekly-plan-exercises.services";
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -94,6 +100,7 @@ import {
       { name: "HealthRestrictions", schema: HealthRestrictionsSchema },
       { name: "GoalSettings", schema: GoalSettingsSchema },
       { name: "WorkoutPlanObjective", schema: WorkoutPlanObjectiveSchema },
+      { name: "UserWorkoutWeeklyPlan", schema: UserWorkoutWeeklyPlanSchema },
     ]),
   ],
   providers: [
@@ -113,6 +120,7 @@ import {
     HealthRestrictionsService,
     GoalSettingService,
     WorkoutPlanObjectiveService,
+    UserWorkoutWeeklyPlanService,
   ],
   controllers: [
     WorkoutController,

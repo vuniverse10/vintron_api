@@ -10,10 +10,13 @@ import {
 import { UserWorkoutService } from "../services/user-workout.services";
 import { UserWorkoutDTO } from "../dto/create-user-workout.dto";
 import { UserWorkout } from "../schemas/user-workout.schema";
-
+import { UserWorkoutWeeklyPlanService } from "../services/user-workouts/user-workout-weekly-plan-exercises.services";
 @Controller("user-workouts")
 export class UserWorkoutsController {
-  constructor(private readonly userWorkoutService: UserWorkoutService) {}
+  constructor(
+    private readonly userWorkoutService: UserWorkoutService,
+    private userWorkoutWeeklyPlanService: UserWorkoutWeeklyPlanService
+  ) {}
 
   @Post()
   create(@Body() UserWorkoutDTO: UserWorkoutDTO): Promise<UserWorkout> {
@@ -41,5 +44,15 @@ export class UserWorkoutsController {
   @Delete(":id")
   remove(@Param("id") id: string): Promise<void> {
     return this.userWorkoutService.remove(id);
+  }
+
+  @Post("user-workout-weekly-workouts")
+  getUserWeeklyWorkouts(@Body() body): Promise<any> {
+    console.log(body);
+    const payLoad = {
+      userID: body.userID,
+      userWorkoutReferenceKey: body.userWorkoutsID,
+    };
+    return this.userWorkoutWeeklyPlanService.fetchWorkoutWeeklyPlan(payLoad);
   }
 }
