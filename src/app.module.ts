@@ -17,6 +17,10 @@ import { ExcelImportController } from "./excel-import/excel-import.controller";
 import { MulterModule } from "@nestjs/platform-express";
 import * as multer from "multer"; // Import multer here
 import { WorkoutSchema } from "./excel-import/workout.schema";
+import {
+  WorkoutPlanObjective,
+  WorkoutPlanObjectiveSchema,
+} from "./excel-import/workout-plan-objectives.schema";
 
 @Module({
   imports: [
@@ -41,7 +45,10 @@ import { WorkoutSchema } from "./excel-import/workout.schema";
     MulterModule.register({
       storage: multer.memoryStorage(),
     }),
-    MongooseModule.forFeature([{ name: "Workout", schema: WorkoutSchema }]),
+    MongooseModule.forFeature([
+      { name: "Workout", schema: WorkoutSchema },
+      { name: "WorkoutPlanObjective", schema: WorkoutPlanObjectiveSchema },
+    ]),
   ],
   controllers: [AppController, ExcelImportController],
   providers: [

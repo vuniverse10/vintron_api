@@ -71,7 +71,11 @@ import { HealthRestrictionsSchema } from "./schemas/goal-settings/health-restric
 import { HealthRestrictionsService } from "./services/goal-settings/health-restrictions.service";
 import { GoalSettingsSchema } from "./schemas/goal-settings/goal-settings.schema";
 import { GoalSettingService } from "./services/goal-settings/goal-settings.service";
-
+import { WorkoutPlanObjectiveService } from "./services/personal-objectives.service";
+import {
+  WorkoutPlanObjective,
+  WorkoutPlanObjectiveSchema,
+} from "./schemas/workout-plan-objectives.schema";
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -89,6 +93,7 @@ import { GoalSettingService } from "./services/goal-settings/goal-settings.servi
       { name: "Goals", schema: GoalSchema },
       { name: "HealthRestrictions", schema: HealthRestrictionsSchema },
       { name: "GoalSettings", schema: GoalSettingsSchema },
+      { name: "WorkoutPlanObjective", schema: WorkoutPlanObjectiveSchema },
     ]),
   ],
   providers: [
@@ -107,6 +112,7 @@ import { GoalSettingService } from "./services/goal-settings/goal-settings.servi
     GoalService,
     HealthRestrictionsService,
     GoalSettingService,
+    WorkoutPlanObjectiveService,
   ],
   controllers: [
     WorkoutController,

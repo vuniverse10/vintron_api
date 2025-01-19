@@ -18,10 +18,14 @@ import { CreateWorkoutTimingDto } from "./dto/create-workout-timing.dto";
 import { CreateWorkoutPlanWeekDto } from "./dto/create-workout-plan-week.dto";
 import { CreateWorkoutDurationDto } from "./dto/create-workout-duration.dto";
 import { Workout } from "../excel-import/workout.schema";
+import { WorkoutPlanObjectiveService } from "./services/personal-objectives.service";
 
 @Controller("workouts")
 export class WorkoutController {
-  constructor(private readonly workoutService: WorkoutService) {}
+  constructor(
+    private readonly workoutService: WorkoutService,
+    private readonly WorkoutPlanObjectiveService: WorkoutPlanObjectiveService
+  ) {}
 
   @Post("age-calculator")
   ageCalculator(@Body() body: { dob: string }) {
@@ -169,5 +173,19 @@ export class WorkoutController {
   @Post("special-workout-data")
   specialWorkoutInfo(@Body() body) {
     return this.workoutService.specialWorkoutExercisesData(body);
+  }
+
+  @Post("bulk-insert-personal-objectives")
+  async bulkInsertPersonalObjectives(
+    @Body()
+    inputReq: {
+      focus_area: string;
+      beginner: string;
+      intermediate: string;
+      advanced: string;
+      elite: string;
+    }[]
+  ): Promise<any> {
+    return this.WorkoutPlanObjectiveService.bulkCreate(inputReq);
   }
 }
