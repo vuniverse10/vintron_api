@@ -1,18 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { WorkoutsPreferTimings } from '../schemas/workouts-prefer-timings.schema';
-import { CreateWorkoutsPreferTimingsDto } from '../dto/create-workouts-prefer-timings.dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
+import { WorkoutsPreferTimings } from "../schemas/workouts-prefer-timings.schema";
+import { CreateWorkoutsPreferTimingsDto } from "../dto/create-workouts-prefer-timings.dto";
 
 @Injectable()
 export class WorkoutsPreferTimingsService {
   constructor(
-    @InjectModel('WorkoutsPreferTimings')
-    private readonly workoutsPreferTimingsModel: Model<WorkoutsPreferTimings>,
+    @InjectModel("WorkoutsPreferTimings")
+    private readonly workoutsPreferTimingsModel: Model<WorkoutsPreferTimings>
   ) {}
 
   async create(
-    createDto: CreateWorkoutsPreferTimingsDto,
+    createDto: CreateWorkoutsPreferTimingsDto
   ): Promise<WorkoutsPreferTimings> {
     const timing = new this.workoutsPreferTimingsModel(createDto);
     return timing.save();
@@ -26,7 +26,7 @@ export class WorkoutsPreferTimingsService {
     const timing = await this.workoutsPreferTimingsModel.findById(id).exec();
     if (!timing) {
       throw new NotFoundException(
-        `WorkoutsPreferTiming with ID ${id} not found`,
+        `WorkoutsPreferTiming with ID ${id} not found`
       );
     }
     return timing;
@@ -34,7 +34,7 @@ export class WorkoutsPreferTimingsService {
 
   async update(
     id: string,
-    updateDto: WorkoutsPreferTimings,
+    updateDto: WorkoutsPreferTimings
   ): Promise<WorkoutsPreferTimings> {
     const updatedTiming = await this.workoutsPreferTimingsModel
       .findByIdAndUpdate(id, updateDto, { new: true })
@@ -42,7 +42,7 @@ export class WorkoutsPreferTimingsService {
 
     if (!updatedTiming) {
       throw new NotFoundException(
-        `WorkoutsPreferTiming with ID ${id} not found`,
+        `WorkoutsPreferTiming with ID ${id} not found`
       );
     }
 
@@ -55,19 +55,19 @@ export class WorkoutsPreferTimingsService {
       .exec();
     if (!result) {
       throw new NotFoundException(
-        `WorkoutsPreferTiming with ID ${id} not found`,
+        `WorkoutsPreferTiming with ID ${id} not found`
       );
     }
   }
 
   async fetchWorkoutPreferTimings(): Promise<
-    { title: string; value: string }[]
+    { title: string; value: string; slots: any }[]
   > {
-    return this.workoutsPreferTimingsModel.find({}, 'title value').exec();
+    return this.workoutsPreferTimingsModel.find({}, "title value slots").exec();
   }
 
   async bulkCreate(
-    personalTrainingData: { title: string; value: string }[],
+    personalTrainingData: { title: string; value: string }[]
   ): Promise<any> {
     const bulkData = personalTrainingData.map((hData) => ({
       height: hData.title,
