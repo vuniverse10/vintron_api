@@ -21,6 +21,7 @@ import {
   WorkoutPlanObjective,
   WorkoutPlanObjectiveSchema,
 } from "./excel-import/workout-plan-objectives.schema";
+import { HydrationModule } from './hydration/hydration.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import {
       { name: "Workout", schema: WorkoutSchema },
       { name: "WorkoutPlanObjective", schema: WorkoutPlanObjectiveSchema },
     ]),
+    HydrationModule,
   ],
   controllers: [AppController, ExcelImportController],
   providers: [
