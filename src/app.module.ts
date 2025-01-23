@@ -23,6 +23,7 @@ import {
 } from "./excel-import/workout-plan-objectives.schema";
 import { HydrationModule } from './hydration/hydration.module';
 import { NutritionModule } from './nutrition/nutrition.module';
+import { MealTypesController } from './meal-types/meal-types.controller';
 
 @Module({
   imports: [
@@ -54,7 +55,7 @@ import { NutritionModule } from './nutrition/nutrition.module';
     HydrationModule,
     NutritionModule,
   ],
-  controllers: [AppController, ExcelImportController],
+  controllers: [AppController, ExcelImportController, MealTypesController],
   providers: [
     {
       provide: APP_FILTER,

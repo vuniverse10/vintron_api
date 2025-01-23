@@ -1,4 +1,3 @@
-// src/workout/workout.controller.ts
 import {
   Controller,
   Get,
