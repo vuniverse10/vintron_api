@@ -7,6 +7,7 @@ import { ServiceResponse } from "@common/service-response";
 
 import { UserWaterHistoryDto } from "../dto/userWaterHistory.dto";
 import { UserWaterHistory } from "../schema/userWaterHistory.schema";
+import * as moment from "moment";
 @Injectable()
 export class HydrationService {
   constructor(
@@ -243,6 +244,7 @@ export class HydrationService {
                 totalWaterIntakeInLiters: result[0].totalWaterIntake,
               }
             : null,
+        graphData: [],
         code: 200,
       };
     } catch (error) {
@@ -268,6 +270,375 @@ export class HydrationService {
       }
     } else {
       return 0;
+    }
+  }
+
+  async getYearlyWaterIntake(userID: string): Promise<any> {
+    try {
+      const resultResponse = await this.userWaterHistoryModel
+        .aggregate([
+          {
+            $match: { userID },
+          },
+          {
+            $addFields: {
+              year: {
+                $year: {
+                  $convert: {
+                    input: "$waterIntakeDate",
+                    to: "date",
+                    onError: null,
+                    onNull: null,
+                  },
+                },
+              },
+            },
+          },
+          {
+            $group: {
+              _id: "$year",
+              totalWaterIntake: { $sum: "$waterIntake" },
+            },
+          },
+          {
+            $project: {
+              year: "$_id",
+              totalWaterIntake: 1,
+              waterIntakeInLiters: {
+                $divide: ["$totalWaterIntake", 1000],
+              },
+              _id: 0,
+            },
+          },
+          {
+            $sort: { year: 1 },
+          },
+        ])
+        .exec();
+
+      if (resultResponse && resultResponse.length > 0) {
+        return {
+          code: 200,
+          message: "Fetching Yearly based Water Intake Information",
+          data: resultResponse,
+        };
+      } else {
+        return {
+          code: 204,
+          message: "No Results Found..!",
+          data: [],
+        };
+      }
+    } catch (error) {
+      return {
+        code: 500,
+        message: `Internal Server Error: ${error.message}`,
+        data: null,
+      };
+    }
+  }
+
+  async getMonthlyWaterIntake(userID: string): Promise<any> {
+    try {
+      const resultResponse = await this.userWaterHistoryModel
+        .aggregate([
+          {
+            $match: { userID },
+          },
+          {
+            $addFields: {
+              year: {
+                $year: {
+                  $convert: {
+                    input: "$waterIntakeDate",
+                    to: "date",
+                    onError: null,
+                    onNull: null,
+                  },
+                },
+              },
+              month: {
+                $month: {
+                  $convert: {
+                    input: "$waterIntakeDate",
+                    to: "date",
+                    onError: null,
+                    onNull: null,
+                  },
+                },
+              },
+            },
+          },
+          {
+            $group: {
+              _id: { year: "$year", month: "$month" },
+              totalWaterIntake: { $sum: { $ifNull: ["$waterIntake", 0] } }, // Fallback to 0 if null
+            },
+          },
+          {
+            $project: {
+              year: "$_id.year",
+              month: "$_id.month",
+              totalWaterIntake: 1,
+              waterIntakeInLiters: {
+                $divide: [
+                  { $ifNull: ["$totalWaterIntake", 0] }, // Ensure no null value
+                  1000,
+                ],
+              },
+              monthName: {
+                $arrayElemAt: [
+                  [
+                    "",
+                    "JAN",
+                    "FEB",
+                    "MAR",
+                    "APR",
+                    "MAY",
+                    "JUN",
+                    "JUL",
+                    "AUG",
+                    "SEP",
+                    "OCT",
+                    "NOV",
+                    "DEC",
+                  ],
+                  "$_id.month",
+                ],
+              },
+              _id: 0,
+            },
+          },
+          {
+            $sort: { year: 1, month: 1 },
+          },
+        ])
+        .exec();
+
+      if (resultResponse && resultResponse.length > 0) {
+        return {
+          code: 200,
+          message: "Month Based Reports",
+          data: resultResponse,
+        };
+      } else {
+        return {
+          code: 204,
+          message: "No Results Found..!",
+          data: [],
+        };
+      }
+    } catch (error) {
+      return {
+        code: 500,
+        message: `Internal Server Error: ${error.message}`,
+        data: null,
+      };
+    }
+  }
+
+  async getDailyWaterIntake(userID: string): Promise<any> {
+    try {
+      const resultResponse = await this.userWaterHistoryModel
+        .aggregate([
+          {
+            $match: { userID },
+          },
+          {
+            $addFields: {
+              date: {
+                $dateToString: {
+                  format: "%Y-%m-%d",
+                  date: { $toDate: "$waterIntakeDate" },
+                },
+              },
+              year: {
+                $year: { $toDate: "$waterIntakeDate" },
+              },
+              month: {
+                $month: { $toDate: "$waterIntakeDate" },
+              },
+              day: {
+                $dayOfMonth: { $toDate: "$waterIntakeDate" },
+              },
+            },
+          },
+          {
+            $group: {
+              _id: { year: "$year", month: "$month", day: "$day" },
+              totalWaterIntake: { $sum: { $ifNull: ["$waterIntake", 0] } }, // Fallback to 0 if null
+            },
+          },
+          {
+            $project: {
+              date: {
+                $concat: [
+                  { $toString: "$_id.year" },
+                  "-",
+                  {
+                    $toString: {
+                      $cond: [
+                        { $lt: ["$_id.month", 10] },
+                        { $concat: ["0", { $toString: "$_id.month" }] },
+                        { $toString: "$_id.month" },
+                      ],
+                    },
+                  },
+                  "-",
+                  {
+                    $toString: {
+                      $cond: [
+                        { $lt: ["$_id.day", 10] },
+                        { $concat: ["0", { $toString: "$_id.day" }] },
+                        { $toString: "$_id.day" },
+                      ],
+                    },
+                  },
+                ],
+              },
+              year: "$_id.year",
+              month: "$_id.month",
+              day: "$_id.day",
+              totalWaterIntake: 1,
+              waterIntakeInLiters: {
+                $divide: ["$totalWaterIntake", 1000], // Convert ml to liters
+              },
+              _id: 0,
+            },
+          },
+          {
+            $sort: { date: 1 },
+          },
+        ])
+        .exec();
+
+      if (resultResponse && resultResponse.length > 0) {
+        return {
+          code: 200,
+          message: "Day base water intake reports",
+          data: resultResponse,
+        };
+      } else {
+        return {
+          code: 204,
+          message: "No Results Found..!",
+          data: [],
+        };
+      }
+    } catch (error) {
+      return {
+        code: 500,
+        message: `Internal Server Error: ${error.message}`,
+        data: null,
+      };
+    }
+  }
+
+  async getThisWeekWaterIntake(userID: string): Promise<any> {
+    try {
+      const startOfWeek = moment().startOf("isoWeek").toDate();
+      const endOfWeek = moment().endOf("isoWeek").toDate();
+
+      const resultResponse = await this.userWaterHistoryModel
+        .aggregate([
+          {
+            $match: {
+              userID,
+              waterIntakeDate: { $gte: startOfWeek, $lte: endOfWeek },
+            },
+          },
+          {
+            $addFields: {
+              year: { $year: { $toDate: "$waterIntakeDate" } },
+              month: { $month: { $toDate: "$waterIntakeDate" } },
+              day: { $dayOfMonth: { $toDate: "$waterIntakeDate" } },
+              dayOfWeek: { $dayOfWeek: { $toDate: "$waterIntakeDate" } },
+            },
+          },
+          {
+            $group: {
+              _id: {
+                year: "$year",
+                month: "$month",
+                day: "$day",
+                dayOfWeek: "$dayOfWeek",
+              },
+              totalWaterIntake: { $sum: { $ifNull: ["$waterIntake", 0] } },
+            },
+          },
+          {
+            $project: {
+              date: {
+                $concat: [
+                  { $toString: "$_id.year" },
+                  "-",
+                  {
+                    $toString: {
+                      $cond: [
+                        { $lt: ["$_id.month", 10] },
+                        { $concat: ["0", { $toString: "$_id.month" }] },
+                        { $toString: "$_id.month" },
+                      ],
+                    },
+                  },
+                  "-",
+                  {
+                    $toString: {
+                      $cond: [
+                        { $lt: ["$_id.day", 10] },
+                        { $concat: ["0", { $toString: "$_id.day" }] },
+                        { $toString: "$_id.day" },
+                      ],
+                    },
+                  },
+                ],
+              },
+              totalWaterIntake: 1,
+              waterIntakeInLiters: {
+                $divide: ["$totalWaterIntake", 1000],
+              },
+              dayName: {
+                $switch: {
+                  branches: [
+                    { case: { $eq: ["$_id.dayOfWeek", 1] }, then: "SUN" },
+                    { case: { $eq: ["$_id.dayOfWeek", 2] }, then: "MON" },
+                    { case: { $eq: ["$_id.dayOfWeek", 3] }, then: "TUE" },
+                    { case: { $eq: ["$_id.dayOfWeek", 4] }, then: "WED" },
+                    { case: { $eq: ["$_id.dayOfWeek", 5] }, then: "THU" },
+                    { case: { $eq: ["$_id.dayOfWeek", 6] }, then: "FRI" },
+                    { case: { $eq: ["$_id.dayOfWeek", 7] }, then: "SAT" },
+                  ],
+                  default: "UNKNOWN",
+                },
+              },
+              _id: 0,
+            },
+          },
+          {
+            $sort: { date: 1 },
+          },
+        ])
+        .exec();
+
+      if (resultResponse && resultResponse.length > 0) {
+        return {
+          code: 200,
+          message: "Successfully fetched water intake for this week",
+          data: resultResponse,
+        };
+      } else {
+        return {
+          code: 204,
+          message: "No Results Found for this week..!",
+          data: [],
+        };
+      }
+    } catch (error) {
+      return {
+        code: 500,
+        message: `Internal Server Error: ${error.message}`,
+        data: null,
+      };
     }
   }
 }
