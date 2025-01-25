@@ -144,4 +144,14 @@ export class NutritionController {
   userDayBasedNutritionData(@Body() body) {
     return this.nutritionService.userDayBasedNutritionData(body);
   }
+
+  @Post("/user-day-based-target-data")
+  UserDayBasedTargetDetails(@Body() body) {
+    return this.nutritionService.UserDayBasedTargetData(body);
+  }
+
+  @Post("/summary-data")
+  UserBasedSummaryData(@Body() body) {
+    return this.nutritionService.userBasedSummaryData(body);
+  }
 }

@@ -382,4 +382,163 @@ export class NutritionService {
       };
     }
   }
+
+  async UserDayBasedTargetData(inputRequest) {
+    try {
+      const { userID: userId, filterDate } = inputRequest;
+
+      if (!userId) {
+        return {
+          error: "User ID is required",
+          message: "Please provide a valid user ID",
+          code: 400,
+        };
+      }
+
+      if (!filterDate) {
+        return {
+          error: "Filter Date is required",
+          message: "Please provide a valid date",
+          code: 400,
+        };
+      }
+
+      const startDate = new Date(filterDate);
+      const formattedFilterDate = startDate.toISOString().split("T")[0];
+
+      const result = await this.userDayBasedCaloriesSetupModel.aggregate([
+        {
+          $match: {
+            userID: userId,
+            goalDate: {
+              $gte: new Date(formattedFilterDate),
+              $lt: new Date(
+                new Date(formattedFilterDate).setDate(
+                  new Date(formattedFilterDate).getDate() + 1
+                )
+              ),
+            },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalConsumedCalories: { $sum: "$caloriesGoal" },
+          },
+        },
+      ]);
+
+      if (result.length === 0) {
+        return {
+          error: "No data found",
+          message: "No data found for the given user or date.",
+          code: 404,
+        };
+      }
+
+      return {
+        message: "User Day based calories data.",
+        data: {
+          date: formattedFilterDate,
+          consumedCalories: result[0].totalConsumedCalories || 0,
+        },
+        code: 200,
+      };
+    } catch (error) {
+      console.error(error);
+      return {
+        error: "Internal Server Error",
+        message: "An error occurred while fetching consumed calories.",
+        code: 500,
+      };
+    }
+  }
+
+  async userBasedSummaryData(inputRequest) {
+    try {
+      const { userID: userId, filterDate } = inputRequest;
+
+      // Validate the input data
+      if (!userId) {
+        return {
+          error: "User ID is required",
+          message: "Please provide a valid user ID",
+          code: 400,
+        };
+      }
+
+      if (!filterDate) {
+        return {
+          error: "Filter Date is required",
+          message: "Please provide a valid date",
+          code: 400,
+        };
+      }
+
+      // Convert the input date (without time) into a Date object and then format it
+      const startDate = new Date(filterDate);
+      const formattedFilterDate = startDate.toISOString().split("T")[0]; // Only keep 'YYYY-MM-DD'
+
+      // Aggregate query to sum calories and nutrients based on userID and createdDateTime
+      const result = await this.userNutritionHistoryModel.aggregate([
+        {
+          $match: {
+            userID: userId,
+            // Match the date part of createdDateTime using $dateToString
+            /* createdDateTime: {
+              $gte: new Date(formattedFilterDate),
+              $lt: new Date(
+                new Date(formattedFilterDate).setDate(
+                  new Date(formattedFilterDate).getDate() + 1
+                )
+              ), // Match the whole day
+            },*/
+          },
+        },
+        {
+          $unwind: "$foodItem", // Unwind the foodItems array to process each item
+        },
+        {
+          $group: {
+            _id: null, // Group by no specific field (we want to sum everything)
+            totalFats: { $sum: "$foodItem.nutrients.fats" }, // Sum the fats
+            totalCarbs: { $sum: "$foodItem.nutrients.carbs" }, // Sum the carbs
+            totalProtein: { $sum: "$foodItem.nutrients.protein" }, // Sum the protein
+            totalCalories: { $sum: "$foodItem.nutrients.calories" }, // Sum the calories
+          },
+        },
+      ]);
+
+      // If no results found, return a message
+      if (result.length === 0) {
+        return {
+          error: "No data found",
+          message: "No data found for the given user or date.",
+          code: 404,
+        };
+      }
+
+      // Return the result with the summed nutrients
+      return {
+        message: "User Day based nutrient data.",
+        data: {
+          date: formattedFilterDate,
+          nutrients: {
+            fats: result[0].totalFats || 0,
+            carbs: result[0].totalCarbs || 0,
+            protein: result[0].totalProtein || 0,
+            calories: result[0].totalCalories || 0,
+          },
+        },
+        code: 200,
+      };
+    } catch (error) {
+      console.error(error);
+      return {
+        error: "Internal Server Error",
+        message: "An error occurred while fetching consumed nutrients.",
+        code: 500,
+      };
+    }
+  }
 }
