@@ -13,11 +13,16 @@ import {
   FastingPackagesSchema,
 } from "./schemas/fasting-packages.schema";
 import { ServiceResponse } from "@common/service-response";
+
+import { UserFastingPlanSchema } from "./schemas/user-fasting-plan.schema";
+import { UserFastingRequestSchema } from "./schemas/user-fasting-request.schema";
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: "FastingPlan", schema: FastingPlanSchema },
       { name: "FastingPackages", schema: FastingPackagesSchema },
+      { name: "UserFastingRequest", schema: UserFastingRequestSchema },
+      { name: "UserFastingPlan", schema: UserFastingPlanSchema },
     ]),
   ],
   controllers: [
