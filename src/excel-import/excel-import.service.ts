@@ -109,4 +109,51 @@ export class ExcelImportService {
       throw new Error("Failed to process Excel file");
     }
   }
+
+  async importFastingPackagesExcel(fileBuffer: Buffer) {
+    try {
+      const workbook = XLSX.read(fileBuffer, { type: "buffer" });
+
+      const result: any[] = [];
+      const sheetName = workbook.SheetNames[0];
+      const cleanSheetName = sheetName
+        .replace(/[^a-zA-Z0-9]/g, "_")
+        .replace(/\s+/g, "_")
+        .toLowerCase();
+
+      const sheet = workbook.Sheets[sheetName];
+      const sheetData = XLSX.utils.sheet_to_json(sheet);
+
+      const transformedData = sheetData.map((row: any) => {
+        const cleanedRow: any = {};
+
+        for (const key in row) {
+          let cleanedKey = key
+            .replace(/[^a-zA-Z0-9]/g, "_")
+            .replace(/\s+/g, "_")
+            .toLowerCase();
+
+          cleanedKey = cleanedKey.replace(/_+/g, "_");
+
+          cleanedRow[cleanedKey] = row[key];
+        }
+
+        // cleanedRow.workout_level = cleanSheetName;
+
+        return cleanedRow;
+      });
+
+      result.push(...transformedData);
+      return result;
+
+      /* await this.WorkoutPlanObjectiveModel.insertMany(result);
+
+      return {
+        message: "Data imported successfully ",
+      };*/
+    } catch (error) {
+      console.error("Error reading Excel file:", error);
+      throw new Error("Failed to process Excel file");
+    }
+  }
 }

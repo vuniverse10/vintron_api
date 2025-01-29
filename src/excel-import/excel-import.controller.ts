@@ -51,4 +51,23 @@ export class ExcelImportController {
       );
     }
   }
+
+  @Post("import-fasting-packages")
+  @UseInterceptors(FileInterceptor("file"))
+  async importFastingPackages(@UploadedFile() file: Express.Multer.File) {
+    try {
+      const buffer = file.buffer;
+
+      const importedData =
+        await this.excelImportService.importFastingPackagesExcel(buffer);
+
+      return importedData;
+    } catch (error) {
+      console.error("Error importing Excel file:", error);
+
+      throw new Error(
+        "An unexpected error occurred while processing the file."
+      );
+    }
+  }
 }

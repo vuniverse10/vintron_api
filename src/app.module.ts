@@ -24,6 +24,7 @@ import {
 import { HydrationModule } from './hydration/hydration.module';
 import { NutritionModule } from './nutrition/nutrition.module';
 import { MealTypesController } from './meal-types/meal-types.controller';
+import { FastingModule } from './fasting/fasting.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { MealTypesController } from './meal-types/meal-types.controller';
     ]),
     HydrationModule,
     NutritionModule,
+    FastingModule,
   ],
   controllers: [AppController, ExcelImportController, MealTypesController],
   providers: [

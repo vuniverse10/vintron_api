@@ -48,4 +48,21 @@ export class ServiceResponse {
       data: [],
     };
   }
+
+  singleRecordResponse<T>(
+    resultContent: T,
+    collectionName: string
+  ): {
+    code: number;
+    message: string;
+    data: T;
+  } {
+    const resultStatus = resultContent ? true : false;
+
+    return {
+      code: resultStatus ? 200 : 204,
+      message: resultStatus ? `Fetching ${collectionName}` : "No Results Found",
+      data: resultStatus ? resultContent : ([] as T),
+    };
+  }
 }
