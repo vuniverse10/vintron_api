@@ -280,8 +280,15 @@ export class NutritionService {
 
       const foodCountMap = new Map();
 
-      orders.forEach((order: any) => {
-        order.foodItem.forEach((item: any) => {
+      orders.forEach((order) => {
+        let foodItems = [];
+        if (Array.isArray(order.foodItem)) {
+          foodItems = order.foodItem;
+        } else if (order.foodItem) {
+          foodItems = [order.foodItem];
+        }
+
+        foodItems.forEach((item) => {
           const foodName = item.food_name;
           foodCountMap.set(foodName, (foodCountMap.get(foodName) || 0) + 1);
         });
